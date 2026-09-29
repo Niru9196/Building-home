@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/marketing/brand-logo";
+import { LinkedInIcon, MailIcon, YouTubeIcon } from "@/components/ui/icons";
 
 const base = "https://www.propsoch.com";
 
@@ -35,20 +36,28 @@ const footerColumns = [
   },
 ] as const;
 
+const socials = [
+  { label: "Propsoch on LinkedIn", href: "https://www.linkedin.com/company/propsoch/", Icon: LinkedInIcon, external: true },
+  { label: "Propsoch on YouTube", href: "https://www.youtube.com/@club.propsoch", Icon: YouTubeIcon, external: true },
+  { label: "Email Propsoch", href: "mailto:hello@propsoch.com", Icon: MailIcon, external: false },
+] as const;
+
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <div className="footer-inner">
+      <div className="container">
         <div className="footer-grid">
           <section className="footer-company" aria-labelledby="footer-company-title">
-            <div className="footer-logo"><BrandLogo /></div>
+            <div className="footer-logo">
+              <BrandLogo />
+            </div>
             <h2 id="footer-company-title">Thinkr Proptech Private Limited</h2>
             <p>Propsoch is the most advanced real estate research platform for homebuyers in India.</p>
             <dl>
               <div>
                 <dt>Karnataka RERA Reg. No.</dt>
                 <dd>
-                  <a href="https://rera.karnataka.gov.in/home?language=en" target="_blank" rel="noreferrer noopener">
+                  <a href="https://rera.karnataka.gov.in/home?language=en" target="_blank" rel="noopener noreferrer">
                     PRM/KA/RERA/1251/446/AG/220927/003103
                   </a>
                 </dd>
@@ -56,7 +65,7 @@ export function SiteFooter() {
               <div>
                 <dt>Maharashtra RERA Reg. No.</dt>
                 <dd>
-                  <a href="https://maharera.maharashtra.gov.in/" target="_blank" rel="noreferrer noopener">
+                  <a href="https://maharera.maharashtra.gov.in/" target="_blank" rel="noopener noreferrer">
                     A041182600110
                   </a>
                 </dd>
@@ -65,11 +74,13 @@ export function SiteFooter() {
           </section>
 
           {footerColumns.map((column) => (
-            <nav key={column.title} aria-label={column.title}>
+            <nav key={column.title} aria-label={column.title} className="footer-col">
               <h2>{column.title}</h2>
               <ul>
                 {column.links.map(([label, href]) => (
-                  <li key={label}><a href={href}>{label}</a></li>
+                  <li key={label}>
+                    <a href={href}>{label}</a>
+                  </li>
                 ))}
               </ul>
             </nav>
@@ -78,19 +89,28 @@ export function SiteFooter() {
 
         <div className="footer-bottom">
           <p>© Copyright Thinkr Proptech Pvt. Ltd. 2026</p>
-          <nav aria-label="Legal links">
+          <nav aria-label="Legal links" className="footer-legal">
             <a href={`${base}/meta/privacy`}>Privacy Policy</a>
             <a href={`${base}/meta/terms`}>Terms &amp; Conditions</a>
           </nav>
           <nav className="footer-socials" aria-label="Social links">
-            <a href="https://www.linkedin.com/company/propsoch/" target="_blank" rel="noreferrer noopener" aria-label="Propsoch on LinkedIn">in</a>
-            <a href="https://www.youtube.com/@club.propsoch" target="_blank" rel="noreferrer noopener" aria-label="Propsoch on YouTube">▶</a>
-            <a href="mailto:hello@propsoch.com" aria-label="Email Propsoch">✉</a>
+            {socials.map(({ label, href, Icon, external }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
+                <Icon size={18} />
+              </a>
+            ))}
           </nav>
         </div>
-
-        <p className="footer-wordmark" aria-hidden="true">Propsoch</p>
       </div>
+
+      <p className="footer-wordmark" aria-hidden="true">
+        Propsoch
+      </p>
     </footer>
   );
 }

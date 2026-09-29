@@ -151,19 +151,7 @@ The improved version should retain Propsoch's visual personality while simplifyi
 
 ---
 
-## 7. Evidence / Screenshots
-
-Recommended screenshots for the final submission:
-
-- Desktop and mobile hero/intro transition.
-- Mobile Lighthouse result showing LCP and TBT.
-- Header showing Heart, Share, and Get Started actions.
-- 25-day process section showing the horizontal-content interaction.
-- Keyboard focus sequence showing non-actionable focus stops.
-
----
-
-## 8. Summary
+## 7. Summary
 
 The current Propsoch landing page has a clear visual identity and strong storytelling, but the analysis shows opportunities to make the experience faster on mobile, clearer in its navigation and CTAs, easier to scan, and more accessible.
 
@@ -172,3 +160,69 @@ The five issues above form the basis for the improved version of the landing pag
 ---
 
 *End of Part 1 — Analysis*
+
+---
+
+# Part 2 — Implementation
+
+Two sections are taken from propsoch.com and redesigned: **"How are we different?"** (comparison) and **"Find a home in 25 days"** (journey). The rest of the page is new.
+
+**Page order:** sticky header → hero → logo strip + metrics → comparison → 25-day journey → final CTA band → footer.
+
+## How each Part 1 issue is addressed
+
+| Part 1 issue | What changed |
+|---|---|
+| 1. Mobile performance | No intro gate: the hero is server-rendered and the hero image is preloaded with `fetchpriority="high"`. CSS is inlined (~10 KB), so there is no render-blocking stylesheet. The Tailwind import was removed. Two unused ~1.6 MB PNGs were deleted, and the social-share image is now a 77 KB 1200×630 JPEG (the page no longer loads the mockup PNG). No new runtime libraries. |
+| 2. Abrupt intro | Replaced with a short CSS load-in: text rises in and the photo settles from a slight zoom. It is disabled under `prefers-reduced-motion` and never blocks content. |
+| 3. Unclear CTAs | Header CTA is **"Chat on WhatsApp"** (opens in a new tab). Hero CTA is **"Start Guided Home Buying"**. The hero card is a real link: "Your home in 25 days → see how it works". Icon-only controls have accessible names. |
+| 4. Hidden 25-day process | The scroll box and wheel takeover are gone. All steps are visible: a horizontal 5-column timeline from 1024px, a vertical timeline below. The progress line fills as you scroll, and numbered stage markers can be clicked. |
+| 5. Keyboard / a11y | One `<main>` with a skip link. Only links and buttons are tabbable (tested). Mega menus open on click/hover, not on focus. The mobile drawer traps focus and closes on Escape or backdrop click. The comparison uses ARIA table roles, and its tabs follow the ARIA tabs keyboard pattern. Visible `:focus-visible` everywhere. Metrics always expose their final values to screen readers. |
+
+## Design system
+
+- **Tokens:** `app/styles/tokens.css` holds colour, type scale (`clamp()`), spacing, radius, shadow and motion. Orange `#c64212` is used for text and buttons (AA contrast); `#ff6d33` only for decoration.
+- **Breakpoints (mobile-first):** 480 / 768 / 1024 / 1280px.
+- **Styles:** one CSS file per section in `app/styles/sections/`.
+- **Modern touches:** frosted header on scroll, glass cards, soft gradients, scroll reveal (`<Reveal>`), count-up metrics (`<CountUp>`), a sliding segmented control, a raised "Recommended" Propsoch column, and a scrolling logo row that pauses on hover.
+- **Responsive comparison:** a table at 768px and up, stacked cards on phones. Both come from the same markup, with no sideways scrolling.
+
+## Lighthouse (local production build, `next start`, Lighthouse 13.5)
+
+| Category | Desktop before → after | Mobile after |
+|---|---|---|
+| Performance | 77 → **100** | **92–95** |
+| Accessibility | 80 → **100** | **100** |
+| Best Practices | 100 → **100** | **100** |
+| SEO | 83 → **100** | **100** |
+
+| Metric | Mobile before → after | Desktop before → after |
+|---|---|---|
+| LCP | 6.1 s → 2.7–3.2 s | 1.4 s → 0.7 s |
+| TBT | 1,320 ms → 100–130 ms | 380 ms → 30–60 ms |
+| Speed Index | 5.0 s → 1.1 s | 1.7 s → 0.5 s |
+| CLS | 0.001 → 0 | 0 → 0 |
+
+The "before" numbers are from the live site; the "after" numbers are from localhost. They are indicative rather than a like-for-like comparison, because the new page has fewer sections and no third-party scripts. The main remaining mobile cost is the 791 px hero photo's render delay under 4× CPU throttling.
+
+## Run it
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+npm run lint && npm run typecheck && npm run build
+npx playwright install chromium   # first time only
+npm run test:e2e     # 4 viewports: 360, 768, 1024, 1440
+```
+
+The e2e suite (`tests/e2e/`) covers:
+
+- no horizontal overflow, including content clipped by `overflow-x: clip`
+- header behaviour and focus trapping
+- mega-menu bounds
+- hero above the fold
+- metric count-up and reduced-motion behaviour
+- comparison tabs and layout
+- the journey's tab order and layout
+
+`visual.spec.ts` writes full-page screenshots to `screenshots/{mobile,tablet,laptop,desktop}.png`.

@@ -1,0 +1,172 @@
+/* ---------- Trust strip + metrics ---------- */
+.trust {
+  position: relative;
+  padding-block: var(--space-7) var(--space-8);
+}
+
+.trust-head {
+  text-align: center;
+}
+
+.trust-title {
+  color: var(--slate-500);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.marquee {
+  position: relative;
+  margin-top: var(--space-5);
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-list {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-right: clamp(2rem, 5vw, 4rem);
+}
+
+.wordmark {
+  color: var(--slate-500);
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transition: color var(--dur) ease;
+}
+
+.marquee:hover .wordmark {
+  color: var(--navy-700);
+}
+
+/* Small typographic nods to each brand — no logo files are shipped. */
+.wordmark-google,
+.wordmark-navi {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wordmark-amazon,
+.wordmark-deloitte {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+}
+
+.wordmark-microsoft,
+.wordmark-atlassian {
+  font-weight: 600;
+}
+
+.wordmark-flipkart,
+.wordmark-phonepe {
+  font-style: italic;
+  font-weight: 800;
+}
+
+.wordmark-jupiter {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metrics {
+  display: grid;
+  margin-top: var(--space-7);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.metric {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  padding: clamp(1rem, 0.8rem + 1vw, 1.75rem);
+}
+
+.metric::before {
+  position: absolute;
+  top: -40%;
+  right: -30%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 109 51 / 16%), transparent 70%);
+  content: "";
+}
+
+.metric-value {
+  position: relative;
+  color: var(--orange-600);
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.9rem);
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.metric-label {
+  position: relative;
+  color: var(--slate-600);
+  font-size: clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 768px) {
+  .metrics {
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 1024px) {
+  .metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .marquee-track {
+    width: auto;
+    justify-content: center;
+    animation: none;
+  }
+
+  .marquee-list {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 1rem;
+    padding-inline: var(--gutter);
+  }
+
+  .marquee-list[aria-hidden="true"] {
+    display: none;
+  }
+}

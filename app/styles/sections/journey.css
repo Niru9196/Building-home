@@ -1,0 +1,395 @@
+/* ---------- 25-day journey (Section B) ---------- */
+.journey {
+  overflow: clip;
+  background:
+    radial-gradient(50rem 28rem at 0% 20%, rgb(255 233 220 / 55%), transparent 70%),
+    linear-gradient(180deg, #fff, var(--cream));
+}
+
+.journey-intro {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.journey-days {
+  position: relative;
+  white-space: nowrap;
+}
+
+.journey-days::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.12em;
+  left: 0;
+  height: 0.28em;
+  border-top: 0.08em solid var(--orange-500);
+  border-radius: 50%;
+  content: "";
+  transform: rotate(-2deg);
+}
+
+.journey-actions {
+  margin-top: var(--space-2);
+}
+
+.journey-quote {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.5rem, 1rem + 2vw, 2.25rem);
+}
+
+.journey-quote-mark {
+  position: absolute;
+  top: -0.6rem;
+  right: 1.25rem;
+  color: var(--orange-200);
+  font-family: Georgia, serif;
+  font-size: 6rem;
+  line-height: 1;
+}
+
+.journey-quote blockquote p {
+  position: relative;
+  color: var(--navy-800);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+}
+
+.journey-quote strong {
+  color: var(--orange-700);
+}
+
+.journey-quote figcaption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.journey-quote figcaption > span:last-child {
+  display: grid;
+  font-size: var(--fs-sm);
+}
+
+.journey-quote figcaption span span {
+  color: var(--slate-500);
+}
+
+.journey-avatar {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--navy-800), var(--navy-900));
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Timeline — mobile-first vertical */
+.timeline {
+  --dot: 2.25rem;
+  --gap: 0rem;
+  position: relative;
+  display: grid;
+  margin-top: var(--space-8);
+}
+
+.stage {
+  position: relative;
+  padding: 0 0 var(--space-6) calc(var(--dot) + 1rem);
+}
+
+.stage:last-child {
+  padding-bottom: 0;
+}
+
+/* Connector segments: track + fill, from this dot to the next one. */
+.stage:not(:last-child)::before,
+.stage:not(:last-child)::after {
+  position: absolute;
+  top: 1.375rem;
+  left: calc(var(--dot) / 2 - 1px);
+  width: 2px;
+  height: 100%;
+  border-radius: 2px;
+  content: "";
+}
+
+.stage:not(:last-child)::before {
+  background: var(--slate-200);
+}
+
+.stage:not(:last-child)::after {
+  background: linear-gradient(180deg, var(--orange-500), var(--orange-600));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.stage[data-state="done"]::after {
+  transform: scaleY(1);
+}
+
+.stage-marker {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: calc((var(--dot) + 1rem) * -1);
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0 0.75rem 0 0;
+  background: transparent;
+  text-align: left;
+}
+
+.stage-dot {
+  position: relative;
+  display: grid;
+  width: var(--dot);
+  height: var(--dot);
+  flex: none;
+  place-items: center;
+  border: 2px solid var(--slate-300);
+  border-radius: 50%;
+  background: white;
+  color: var(--slate-500);
+  font-size: 0.85rem;
+  font-weight: 750;
+  transition:
+    background-color var(--dur) ease,
+    border-color var(--dur) ease,
+    color var(--dur) ease,
+    box-shadow var(--dur) ease;
+}
+
+.stage[data-state="done"] .stage-dot {
+  border-color: var(--orange-600);
+  background: var(--orange-600);
+  color: white;
+}
+
+.stage[data-state="current"] .stage-dot {
+  border-color: var(--orange-600);
+  background: white;
+  color: var(--orange-700);
+  box-shadow: 0 0 0 6px rgb(255 109 51 / 18%);
+}
+
+.stage[data-state="current"] .stage-dot::after {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--orange-500);
+  border-radius: 50%;
+  content: "";
+  animation: ping 2.2s var(--ease-out) infinite;
+}
+
+.stage-label {
+  color: var(--orange-700);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.stage-marker:hover .stage-dot {
+  border-color: var(--orange-600);
+}
+
+.stage-title {
+  margin-top: 0.25rem;
+  color: var(--navy-900);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.stage-cards {
+  display: grid;
+  margin-top: var(--space-3);
+  gap: var(--space-3);
+}
+
+.step-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.2rem;
+  background: white;
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--dur) ease,
+    box-shadow var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.step-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.stage[data-state="current"] .step-card {
+  border-color: rgb(255 109 51 / 45%);
+  box-shadow: var(--shadow-md);
+}
+
+.step-card h4 {
+  color: var(--navy-900);
+  font-size: 1rem;
+  font-weight: 680;
+}
+
+.step-card p {
+  margin-top: 0.4rem;
+  color: var(--slate-600);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.step-chip {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.7rem;
+  background: var(--orange-50);
+  color: var(--orange-700);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.step-celebration {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, var(--green-50), #f2fbf6);
+  color: var(--green-700);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.step-celebration svg {
+  flex: none;
+  margin-top: 0.05rem;
+}
+
+.journey-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-5);
+  color: var(--slate-600);
+}
+
+.journey-footer strong {
+  color: var(--navy-900);
+}
+
+.journey-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--orange-700);
+  font-weight: 650;
+}
+
+.journey-link svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.journey-link:hover svg {
+  transform: translateX(3px);
+}
+
+@media (min-width: 768px) {
+  .journey-intro {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: end;
+    gap: var(--space-7);
+  }
+}
+
+/* Desktop: horizontal 5-column timeline */
+@media (min-width: 1024px) {
+  .timeline {
+    --gap: 1rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+
+  .stage {
+    padding: 0;
+  }
+
+  .stage:not(:last-child)::before,
+  .stage:not(:last-child)::after {
+    top: calc(1.375rem - 1px);
+    left: calc(var(--dot) / 2);
+    width: calc(100% + var(--gap));
+    height: 2px;
+  }
+
+  .stage:not(:last-child)::after {
+    background: linear-gradient(90deg, var(--orange-500), var(--orange-600));
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .stage[data-state="done"]::after {
+    transform: scaleX(1);
+  }
+
+  .stage-marker {
+    margin-left: 0;
+  }
+
+  .stage-marker .stage-label {
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--cream);
+  }
+
+  .stage-title {
+    margin-top: var(--space-3);
+    font-size: 1.15rem;
+  }
+
+  .step-card {
+    padding: 1rem;
+  }
+
+  .step-card p {
+    font-size: 0.87rem;
+  }
+
+  .step-celebration {
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .timeline {
+    --gap: 1.25rem;
+  }
+
+  .step-card {
+    padding: 1.15rem 1.25rem;
+  }
+}

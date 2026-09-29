@@ -1,22 +1,8 @@
 import Image from "next/image";
 
+import { ArrowRightIcon, ArrowUpRightIcon } from "@/components/ui/icons";
 import { siteConfig } from "@/config/site";
 import heroImage from "@/public/images/hero-homebuyers.webp";
-import whatsappLogo from "@/public/whatsapp.svg";
-
-function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="22"
-      height="22"
-      aria-hidden="true"
-      className={diagonal ? "diagonal-arrow" : undefined}
-    >
-      <path d="M5 12h13M14 7l5 5-5 5" />
-    </svg>
-  );
-}
 
 function GuidanceIcon() {
   return (
@@ -44,19 +30,6 @@ function HomeIcon() {
   );
 }
 
-function WhatsAppIcon() {
-  return (
-    <Image
-      src={whatsappLogo}
-      alt=""
-      width={32}
-      height={32}
-      className="whatsapp-icon"
-      unoptimized
-    />
-  );
-}
-
 const benefits = [
   { label: "Expert Guidance", icon: <GuidanceIcon /> },
   { label: "Verified Properties", icon: <ShieldIcon /> },
@@ -65,7 +38,7 @@ const benefits = [
 
 function BotanicalAccent() {
   return (
-    <svg className="botanical-accent" viewBox="0 0 180 180" aria-hidden="true">
+    <svg className="hero-botanical" viewBox="0 0 180 180" aria-hidden="true">
       <path className="stem" d="M-10 166c35-48 57-88 68-146" />
       <path d="M28 126C4 117-7 96 2 77c24 6 38 25 26 49ZM48 94C29 77 27 54 41 40c20 14 25 37 7 54ZM61 60C49 39 56 17 74 8c14 19 8 42-13 52ZM15 151c-22 1-38-13-38-31 22-5 42 6 38 31Z" />
     </svg>
@@ -74,85 +47,94 @@ function BotanicalAccent() {
 
 export function Hero() {
   return (
-    <main className="hero">
-      <BotanicalAccent />
-      <div className="hero-inner">
-        <section className="hero-content" aria-labelledby="hero-title">
-          <p className="hero-eyebrow">India&apos;s First Guided Home-Buying Platform</p>
-          <h1 id="hero-title">
-            Find a home you’ll love,{" "}
-            <span>with the right guidance.</span>
+    <section className="hero" aria-labelledby="hero-title">
+      <div className="hero-backdrop" aria-hidden="true">
+        <span className="hero-blob hero-blob-a" />
+        <span className="hero-blob hero-blob-b" />
+        <BotanicalAccent />
+      </div>
+
+      <div className="hero-grid">
+        <div className="hero-content">
+          <p className="hero-eyebrow">
+            <span className="hero-eyebrow-dot" aria-hidden="true" />
+            India&apos;s First Guided Home-Buying Platform
+          </p>
+          <h1 id="hero-title" className="hero-title">
+            Find a home you’ll love, <span>with the right guidance.</span>
           </h1>
           <p className="hero-description">
-            Propsoch helps you make smarter decisions, avoid costly mistakes and find
-            the perfect home — with expert guidance, end-to-end support and zero
-            guesswork.
+            Propsoch helps you make smarter decisions, avoid costly mistakes and find the
+            perfect home — with expert guidance, end-to-end support and zero guesswork.
           </p>
 
-          <div className="hero-actions" aria-label="Get started with Propsoch">
+          <div className="hero-actions">
             <a
               href={siteConfig.links.getStarted}
-              className="button button-primary"
+              className="btn btn-primary btn-lg"
               data-analytics-event="hero_get_started"
             >
-              <span>Get Started</span>
-              <ArrowIcon />
+              Start Guided Home Buying
+              <ArrowRightIcon size={20} />
             </a>
             <a
               href={siteConfig.links.exploreServices}
-              className="button button-secondary"
+              className="btn btn-secondary btn-lg"
               data-analytics-event="hero_explore_services"
             >
               Explore Our Services
             </a>
           </div>
 
-          <ul className="benefit-list" aria-label="Propsoch benefits">
+          <ul className="hero-benefits" aria-label="Why homebuyers choose Propsoch">
             {benefits.map((benefit) => (
               <li key={benefit.label}>
-                <span className="benefit-icon">{benefit.icon}</span>
+                <span className="hero-benefit-icon">{benefit.icon}</span>
                 <span>{benefit.label}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </div>
 
-        <section className="hero-visual" aria-label="Homebuying with confidence">
-          <div className="hero-ring" aria-hidden="true" />
+        <div className="hero-visual">
+          <span className="hero-ring" aria-hidden="true" />
           <div className="hero-photo-frame">
             <Image
               src={heroImage}
               alt="Indian couple relaxing together in their sunlit city apartment"
               fill
-              sizes="(max-width: 900px) 100vw, 52vw"
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="hero-photo"
               placeholder="blur"
               preload
+              fetchPriority="high"
             />
           </div>
 
-          <p className="hero-handwritten">
+          <p className="hero-note" aria-hidden="true">
             Better decisions.
             <br />
             Brighter tomorrows.
-            <span aria-hidden="true" />
           </p>
 
-          <aside className="journey-card">
-            <span className="journey-icon">
-              <WhatsAppIcon />
+          <a
+            href="#how-it-works"
+            className="hero-journey-card glass"
+            data-analytics-event="hero_journey_card"
+          >
+            <span className="hero-journey-icon">
+              <HomeIcon />
             </span>
-            <p>
-              Your home-buying journey
-              <br />
-              with expert support —
-              <br />
-              from start to keys.
-            </p>
-            <ArrowIcon diagonal />
-          </aside>
-        </section>
+            <span className="hero-journey-text">
+              <strong>Your home in 25 days</strong>
+              <span>Expert support from start to keys — see how it works</span>
+            </span>
+            <span className="hero-journey-arrow">
+              <ArrowUpRightIcon size={18} />
+            </span>
+          </a>
+        </div>
       </div>
-    </main>
+    </section>
   );
 }

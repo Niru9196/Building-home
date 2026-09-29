@@ -1,0 +1,97 @@
+/*
+ * Design tokens — the single source of truth for colour, type, spacing,
+ * radius, elevation and motion. Breakpoints (mobile-first, min-width):
+ *   480px (sm) · 768px (md) · 1024px (lg) · 1280px (xl)
+ */
+:root {
+  /* Brand */
+  --orange-400: #ff8a5c;
+  --orange-500: #ff6d33; /* decorative accents only */
+  --orange-600: #c64212; /* text + button fills (AA on white/cream) */
+  --orange-700: #a8320d;
+  --orange-800: #7f260b;
+  --orange-50: #fff6f0;
+  --orange-100: #ffe9dc;
+  --orange-200: #ffd4bd;
+
+  --navy-900: #122a3f;
+  --navy-800: #1c3549;
+  --navy-700: #2b4257;
+  --slate-600: #4f6477;
+  --slate-500: #5b6f82;
+  --slate-300: #b7c3cd;
+  --slate-200: #dce3e9;
+  --slate-100: #eef2f5;
+
+  --green-700: #0f6546;
+  --green-600: #137452;
+  --green-50: #e7f6ee;
+  --red-600: #b3261e;
+  --red-50: #fdeeed;
+
+  --cream: #fffaf5;
+  --surface: #ffffff;
+  --ink: var(--navy-900);
+  --ink-muted: var(--slate-500);
+  --line: var(--slate-200);
+
+  --glass-bg: rgb(255 255 255 / 72%);
+  --glass-border: rgb(255 255 255 / 70%);
+  --glass-blur: 18px;
+
+  /* Typography */
+  --font-body: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-script: var(--font-handwritten), "Segoe Script", cursive;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: clamp(1.02rem, 0.95rem + 0.3vw, 1.2rem);
+  --fs-lg: clamp(1.15rem, 1rem + 0.6vw, 1.5rem);
+  --fs-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  --fs-2xl: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+  --fs-display: clamp(2.15rem, 1.35rem + 3.9vw, 4.4rem);
+
+  /* Layout */
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --container: 78rem;
+  --header-h: 4.25rem;
+  --section-y: clamp(4.5rem, 3rem + 6vw, 8rem);
+
+  /* Spacing (8px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Radius */
+  --radius-sm: 0.625rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-xs: 0 1px 2px rgb(18 42 63 / 6%);
+  --shadow-sm: 0 2px 8px rgb(18 42 63 / 6%), 0 1px 2px rgb(18 42 63 / 4%);
+  --shadow-md: 0 12px 32px -12px rgb(18 42 63 / 18%), 0 2px 6px rgb(18 42 63 / 5%);
+  --shadow-lg: 0 30px 60px -24px rgb(18 42 63 / 28%), 0 8px 20px -8px rgb(18 42 63 / 10%);
+  --shadow-glow: 0 18px 50px -18px rgb(255 109 51 / 55%);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 160ms;
+  --dur: 320ms;
+  --dur-slow: 700ms;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 5rem;
+  }
+}

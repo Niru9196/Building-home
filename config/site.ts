@@ -43,6 +43,12 @@ export const siteConfig = {
   },
 } as const;
 
+/** In-page anchors shown alongside the mega menus. */
+export const sectionLinks: readonly NavigationLink[] = [
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Why us", href: "#why-us" },
+];
+
 export const megaNavigation: readonly NavigationCategory[] = [
   {
     label: "Properties",

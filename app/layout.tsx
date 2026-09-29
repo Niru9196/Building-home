@@ -6,7 +6,6 @@ import { WebVitals } from "@/app/_components/web-vitals";
 import { siteConfig } from "@/config/site";
 
 import "./globals.css";
-import "./sections.css";
 
 const geist = Geist({
   variable: "--font-sans",
@@ -46,9 +45,9 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: "/images/propsoch-reference.png",
-        width: 1920,
-        height: 1080,
+        url: "/images/og-propsoch.jpg",
+        width: 1200,
+        height: 630,
         alt: "Propsoch guided home-buying platform",
       },
     ],
@@ -57,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/images/propsoch-reference.png"],
+    images: ["/images/og-propsoch.jpg"],
   },
   robots: {
     index: true,
@@ -74,8 +73,10 @@ const analyticsEnabled = Boolean(process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT);
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${caveat.variable}`}>
+    <html lang="en" className={`${geist.variable} ${caveat.variable}`} suppressHydrationWarning>
       <body>
+        {/* Flags JS support before paint so scroll-reveal never hides content without JS. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         {analyticsEnabled ? <WebVitals /> : null}
         {children}
       </body>

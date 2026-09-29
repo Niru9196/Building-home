@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
+import { ArrowRightIcon, PhoneIcon, SparkleIcon } from "@/components/ui/icons";
+import { Reveal } from "@/components/ui/reveal";
 import { siteConfig } from "@/config/site";
-
-type StageId = "today" | "week-1" | "week-2" | "week-3" | "last-week";
 
 interface JourneyStep {
   title: string;
@@ -13,9 +13,9 @@ interface JourneyStep {
 }
 
 interface JourneyStage {
-  id: StageId;
+  id: string;
   label: string;
-  title?: string;
+  title: string;
   steps: readonly JourneyStep[];
   celebration?: string;
 }
@@ -24,7 +24,7 @@ const stages: readonly JourneyStage[] = [
   {
     id: "today",
     label: "Today",
-    title: "Start Guided Home Buying today",
+    title: "Kick-off",
     steps: [
       {
         title: "A quick free call",
@@ -36,228 +36,232 @@ const stages: readonly JourneyStage[] = [
   {
     id: "week-1",
     label: "Week 1",
+    title: "Discovery",
     steps: [
       {
         title: "Discovery form",
         description:
-          "Tell us what you are looking for so that your advisor can start building a shortlist of verified projects.",
+          "Tell us what you are looking for so your advisor can start building a shortlist of verified projects.",
       },
       {
         title: "Longlist call",
         description:
-          "The team curates a list of 10-12 properties tailored to your preferences and walks you through in detail.",
+          "The team curates 10-12 properties tailored to your preferences and walks you through them in detail.",
       },
     ],
   },
   {
     id: "week-2",
     label: "Week 2",
+    title: "On the ground",
     steps: [
       {
         title: "Site visits",
         description:
-          "Once we've narrowed down the final 4-5 properties, it's time for seeing and analysing them in person!",
+          "Once we've narrowed down the final 4-5 properties, it's time to see and analyse them in person!",
       },
     ],
   },
   {
     id: "week-3",
     label: "Week 3",
+    title: "Due diligence",
     steps: [
       {
         title: "Deepdiving",
         description:
-          "Found the one? Get your 'Peace of Mind' report within a day. Everything you need to know about the property, in one place.",
-        note: "Along with loan assistance.",
+          "Found the one? Get your 'Peace of Mind' report within a day — everything about the property, in one place.",
+        note: "Along with loan assistance",
       },
     ],
   },
   {
     id: "last-week",
     label: "Last week",
+    title: "Closure",
     steps: [
       {
         title: "Negotiation and Closure",
         description:
-          "Take your time and once you're ready, we'll handle the negotiation and seal the best deal for you.",
+          "Take your time. Once you're ready, we handle the negotiation and seal the best deal for you.",
       },
     ],
-    celebration: "Congratulations! you found your home sweet home!",
+    celebration: "Congratulations! You found your home sweet home.",
   },
 ];
 
-function StepIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path d="M7 3h7l4 4v14H7zM14 3v5h5M10 13h5M10 17h5" />
-    </svg>
-  );
-}
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
 export function JourneySection() {
-  const [activeStage, setActiveStage] = useState<StageId>("today");
-  const layoutRef = useRef<HTMLDivElement>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const stageRefs = useRef<Partial<Record<StageId, HTMLElement>>>({});
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLOListElement>(null);
+  const stageRefs = useRef<(HTMLLIElement | null)[]>([]);
 
-  const updateActiveStage = useCallback(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
+  /**
+   * Scroll-linked progress.
+   * - Horizontal (≥1024px): the fill advances as the timeline travels
+   *   from the lower part of the viewport towards the middle.
+   * - Vertical: a stage becomes active once its marker crosses 45% of
+   *   the viewport height.
+   */
+  const update = useCallback(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const viewport = window.innerHeight;
 
-    if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 8) {
-      setActiveStage("last-week");
+    if (window.matchMedia(DESKTOP_QUERY).matches) {
+      const top = list.getBoundingClientRect().top;
+      const progress = Math.min(1, Math.max(0, (viewport * 0.85 - top) / (viewport * 0.45)));
+      setActive(Math.round(progress * (stages.length - 1)));
       return;
     }
 
-    const marker = scroller.scrollTop + scroller.clientHeight * 0.32;
-    let nextStage: StageId = "today";
-    for (const stage of stages) {
-      const element = stageRefs.current[stage.id];
-      if (element && element.offsetTop <= marker) nextStage = stage.id;
-    }
-    setActiveStage(nextStage);
+    let next = 0;
+    stageRefs.current.forEach((stage, index) => {
+      if (stage && stage.getBoundingClientRect().top <= viewport * 0.45) next = index;
+    });
+    setActive(next);
   }, []);
 
-  const goToStage = (id: StageId) => {
-    const scroller = scrollerRef.current;
-    const stage = stageRefs.current[id];
-    if (!scroller || !stage) return;
-    setActiveStage(id);
-    scroller.scrollTo({
-      top: stage.offsetTop,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-    });
+  useEffect(() => {
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [update]);
+
+  const goToStage = (index: number) => {
+    setActive(index);
+    // Horizontal layout already shows every stage; only scroll when stacked.
+    if (window.matchMedia(DESKTOP_QUERY).matches) return;
+    const stage = stageRefs.current[index];
+    if (!stage) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const top = stage.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.3;
+    window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
   };
 
-  const handoffWheelToTimeline = useCallback(
-    (event: WheelEvent) => {
-      const scroller = scrollerRef.current;
-      if (!scroller || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-
-      const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
-      const movingForward = event.deltaY > 0;
-      const canMoveForward = scroller.scrollTop < maxScrollTop - 1;
-      const canMoveBackward = scroller.scrollTop > 1;
-
-      if ((movingForward && !canMoveForward) || (!movingForward && !canMoveBackward)) {
-        return;
-      }
-
-      event.preventDefault();
-      const multiplier =
-        event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientHeight : 1;
-      scroller.scrollTop = Math.min(
-        maxScrollTop,
-        Math.max(0, scroller.scrollTop + event.deltaY * multiplier),
-      );
-      updateActiveStage();
-    },
-    [updateActiveStage],
-  );
-
-  useEffect(() => {
-    const layout = layoutRef.current;
-    if (!layout) return;
-    layout.addEventListener("wheel", handoffWheelToTimeline, { passive: false });
-    return () => layout.removeEventListener("wheel", handoffWheelToTimeline);
-  }, [handoffWheelToTimeline]);
-
-  const activeStageIndex = stages.findIndex((stage) => stage.id === activeStage);
-
   return (
-    <section className="journey-section" id="how-it-works" aria-labelledby="journey-title">
-      <div ref={layoutRef} className="section-container journey-layout">
+    <section className="section journey" id="how-it-works" aria-labelledby="journey-title">
+      <div className="container">
         <div className="journey-intro">
-          <p className="section-kicker">Buying a property should not take you forever</p>
-          <h2 id="journey-title">
-            Here&apos;s how you will find a home with us in <strong>25 days</strong>
-          </h2>
-          <a href={siteConfig.links.getStarted} className="journey-cta" data-analytics-event="journey_book_appointment">
-            Book An Appointment
-          </a>
-          <blockquote>
-            <p>
-              “Their scientific and <em>research-based approach</em> to homebuying gave us a lot of comfort and solved our biggest pain point.”
+          <Reveal className="section-head">
+            <p className="kicker">Buying a property should not take forever</p>
+            <h2 id="journey-title" className="section-title">
+              Here&apos;s how you&apos;ll find a home with us in{" "}
+              <em className="journey-days">25&nbsp;days</em>
+            </h2>
+            <p className="section-lead">
+              A clear, guided sequence — from the first call to the keys. No guesswork, no
+              endless site visits.
             </p>
-            <footer><strong>Roshik Shenoy</strong><span>Partner, Human Capital @ Deloitte</span></footer>
-          </blockquote>
+            <div className="journey-actions">
+              <a
+                href={siteConfig.links.getStarted}
+                className="btn btn-primary"
+                data-analytics-event="journey_book_call"
+              >
+                <PhoneIcon size={18} />
+                Book a free call
+              </a>
+            </div>
+          </Reveal>
+
+          <Reveal as="figure" className="journey-quote glass" delay={120}>
+            <span className="journey-quote-mark" aria-hidden="true">
+              “
+            </span>
+            <blockquote>
+              <p>
+                Their scientific and <strong>research-based approach</strong> to homebuying gave
+                us a lot of comfort and solved our biggest pain point.
+              </p>
+            </blockquote>
+            <figcaption>
+              <span className="journey-avatar" aria-hidden="true">
+                RS
+              </span>
+              <span>
+                <strong>Roshik Shenoy</strong>
+                <span>Partner, Human Capital @ Deloitte</span>
+              </span>
+            </figcaption>
+          </Reveal>
         </div>
 
-        <div className="journey-steps" role="region" aria-label="25-day homebuying steps">
-          <div className="journey-scroll-status">
-            <span className="journey-scroll-hint">
-              <span aria-hidden="true">↕</span> Scroll to explore the full journey
-            </span>
-            <div
-              className="journey-progress"
-              role="progressbar"
-              aria-label="Journey progress"
-              aria-valuemin={1}
-              aria-valuemax={stages.length}
-              aria-valuenow={activeStageIndex + 1}
-              aria-valuetext={`${stages[activeStageIndex].label}, step ${activeStageIndex + 1} of ${stages.length}`}
-            >
-              <span
-                aria-hidden="true"
-                style={{ transform: `scaleX(${(activeStageIndex + 1) / stages.length})` }}
-              />
-            </div>
-          </div>
-          <nav className="journey-stage-nav" aria-label="Journey stages">
-            {stages.map((stage) => (
-              <button
-                type="button"
-                key={stage.id}
-                aria-label={`Go to ${stage.label}`}
-                aria-current={activeStage === stage.id ? "step" : undefined}
-                onClick={() => goToStage(stage.id)}
-              >
-                <span aria-hidden="true" />
-              </button>
-            ))}
-          </nav>
-
-          <div
-            ref={scrollerRef}
-            className="journey-scroll"
-            data-testid="journey-scroll"
-            data-active-stage={activeStage}
-            onScroll={updateActiveStage}
-            tabIndex={0}
-          >
-            <div className="journey-line" aria-hidden="true" />
-            {stages.map((stage) => (
-              <section
-                className={`journey-stage${activeStage === stage.id ? " active" : ""}`}
+        <ol
+          ref={listRef}
+          className="timeline"
+          aria-label="25-day homebuying timeline"
+          data-testid="journey-timeline"
+        >
+          {stages.map((stage, index) => {
+            const state = index < active ? "done" : index === active ? "current" : "upcoming";
+            return (
+              <li
                 key={stage.id}
                 ref={(element) => {
-                  if (element) stageRefs.current[stage.id] = element;
+                  stageRefs.current[index] = element;
                 }}
+                className="stage"
+                data-state={state}
+                style={{ "--i": index } as CSSProperties}
                 aria-labelledby={`${stage.id}-title`}
               >
-                <header>
-                  <span aria-hidden="true">✦</span>
-                  <div>
-                    <p>{stage.label}</p>
-                    <h3 id={`${stage.id}-title`}>{stage.title || stage.label}</h3>
-                  </div>
-                </header>
-                <div className="journey-cards">
+                <button
+                  type="button"
+                  className="stage-marker"
+                  aria-current={index === active ? "step" : undefined}
+                  onClick={() => goToStage(index)}
+                >
+                  <span className="stage-dot" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <span className="stage-label">{stage.label}</span>
+                </button>
+
+                <h3 id={`${stage.id}-title`} className="stage-title">
+                  {stage.title}
+                </h3>
+
+                <div className="stage-cards">
                   {stage.steps.map((step) => (
-                    <article key={step.title}>
-                      <div className="journey-step-title"><StepIcon /><h4>{step.title}</h4></div>
+                    <article className="step-card" key={step.title}>
+                      <h4>{step.title}</h4>
                       <p>{step.description}</p>
-                      {step.note ? <small>{step.note}</small> : null}
+                      {step.note ? <span className="step-chip">+ {step.note}</span> : null}
                     </article>
                   ))}
-                  {stage.celebration ? <p className="journey-celebration">{stage.celebration}</p> : null}
+                  {stage.celebration ? (
+                    <p className="step-celebration">
+                      <SparkleIcon size={18} />
+                      {stage.celebration}
+                    </p>
+                  ) : null}
                 </div>
-              </section>
-            ))}
-          </div>
-        </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        <Reveal className="journey-footer">
+          <p>
+            <strong>9 in 10</strong> Propsoch homebuyers close within 25 days.
+          </p>
+          <a href={siteConfig.links.exploreServices} className="journey-link">
+            Explore Guided Home Buying
+            <ArrowRightIcon size={18} />
+          </a>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,51 +1,71 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { MegaNavigation } from "@/components/marketing/mega-navigation";
 import { MobileNavigation } from "@/components/marketing/mobile-navigation";
-import { megaNavigation, siteConfig } from "@/config/site";
+import { UserIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { useHydrated } from "@/lib/use-in-view";
+import { megaNavigation, sectionLinks, siteConfig } from "@/config/site";
 
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <circle cx="12" cy="7.5" r="3.25" />
-      <path d="M5.5 20c.3-4.1 2.5-6.2 6.5-6.2s6.2 2.1 6.5 6.2" />
-    </svg>
+function subscribeScroll(callback: () => void) {
+  window.addEventListener("scroll", callback, { passive: true });
+  return () => window.removeEventListener("scroll", callback);
+}
+
+function useScrolled(offset = 12) {
+  return useSyncExternalStore(
+    subscribeScroll,
+    () => window.scrollY > offset,
+    () => false,
   );
 }
 
 export function SiteHeader() {
+  const scrolled = useScrolled();
+  const hydrated = useHydrated();
+
   return (
-    <header className="site-header">
-      <div className="header-inner">
+    <header className="site-header" data-scrolled={scrolled ? "true" : "false"}
+      data-hydrated={hydrated ? "true" : "false"}
+    >
+      <div className="header-inner container">
         <a href={siteConfig.links.home} className="logo-link" aria-label="Propsoch home">
           <BrandLogo priority />
         </a>
 
-        <MegaNavigation categories={megaNavigation} />
+        <MegaNavigation categories={megaNavigation} sectionLinks={sectionLinks} />
 
-        <div className="desktop-actions">
+        <div className="header-actions">
           <a
             href={siteConfig.links.login}
-            className="login-link"
+            className="header-login"
             data-analytics-event="header_login"
           >
-            <UserIcon />
-            <span>Log In / Sign Up</span>
+            <UserIcon size={18} />
+            <span className="header-login-label">Log In / Sign Up</span>
           </a>
           <a
-            href={siteConfig.links.getStarted}
-            className="header-get-started"
-            data-analytics-event="header_get_started"
+            href={siteConfig.links.community}
+            className="header-cta"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-analytics-event="header_whatsapp"
           >
-            Get Started
+            <WhatsAppIcon size={20} />
+            <span className="header-cta-label">
+              <span className="header-cta-prefix">Chat on </span>WhatsApp
+            </span>
           </a>
+          <MobileNavigation
+            categories={megaNavigation}
+            sectionLinks={sectionLinks}
+            loginHref={siteConfig.links.login}
+            getStartedHref={siteConfig.links.getStarted}
+            communityHref={siteConfig.links.community}
+          />
         </div>
-
-        <MobileNavigation
-          categories={megaNavigation}
-          loginHref={siteConfig.links.login}
-          getStartedHref={siteConfig.links.getStarted}
-          communityHref={siteConfig.links.community}
-        />
       </div>
     </header>
   );

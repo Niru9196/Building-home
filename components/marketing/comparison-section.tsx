@@ -1,6 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+
+import { CheckIcon, CrossIcon } from "@/components/ui/icons";
+import { Reveal } from "@/components/ui/reveal";
 
 type ComparisonType = "brokers" | "portals";
 
@@ -10,10 +13,18 @@ interface ComparisonRow {
   alternative: string;
 }
 
-const comparisons: Record<ComparisonType, { label: string; heading: string; rows: ComparisonRow[] }> = {
+interface Comparison {
+  label: string;
+  heading: string;
+  short: string;
+  rows: readonly ComparisonRow[];
+}
+
+const comparisons: Record<ComparisonType, Comparison> = {
   brokers: {
     label: "Local brokers",
     heading: "Local brokers",
+    short: "Broker",
     rows: [
       { concern: "Sales Practices", propsoch: "Consultative, no pressure", alternative: "High pressure sales tactics" },
       { concern: "Transparency", propsoch: "Detailed pros & cons", alternative: "Only pros highlighted" },
@@ -28,7 +39,8 @@ const comparisons: Record<ComparisonType, { label: string; heading: string; rows
   },
   portals: {
     label: "Online portals",
-    heading: "Online portals (Housing/99Acres/Magicbricks)",
+    heading: "Online portals",
+    short: "Portal",
     rows: [
       { concern: "Information Depth", propsoch: "80+ data points", alternative: "20-40 data points" },
       { concern: "Transparency", propsoch: "Detailed pros & cons", alternative: "Only pros highlighted" },
@@ -39,80 +51,152 @@ const comparisons: Record<ComparisonType, { label: string; heading: string; rows
   },
 };
 
-const metrics = [
-  ["8500+", "Hours of Research"],
-  ["290+", "Builder Partners"],
-  ["2,500+", "Intelligent Homebuyers"],
-  ["700+", "Projects Across Bangalore"],
-] as const;
+const order = Object.keys(comparisons) as ComparisonType[];
 
 export function ComparisonSection() {
-  const [activeComparison, setActiveComparison] = useState<ComparisonType>("brokers");
-  const tabPrefix = useId();
-  const comparison = comparisons[activeComparison];
+  const [active, setActive] = useState<ComparisonType>("brokers");
+  const idPrefix = useId();
+  const tabRefs = useRef<Partial<Record<ComparisonType, HTMLButtonElement>>>({});
+  const comparison = comparisons[active];
+  const activeIndex = order.indexOf(active);
+
+  const select = (key: ComparisonType, focus = false) => {
+    setActive(key);
+    if (focus) tabRefs.current[key]?.focus();
+  };
+
+  // ARIA tabs pattern: arrows move + activate, Home/End jump to the ends.
+  const onTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const last = order.length - 1;
+    let next: number | null = null;
+    if (event.key === "ArrowRight") next = activeIndex === last ? 0 : activeIndex + 1;
+    if (event.key === "ArrowLeft") next = activeIndex === 0 ? last : activeIndex - 1;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = last;
+    if (next === null) return;
+    event.preventDefault();
+    select(order[next], true);
+  };
 
   return (
-    <section className="comparison-section" id="difference" aria-labelledby="comparison-title">
-      <div className="section-container">
-        <div className="comparison-heading-row">
-          <div>
-            <p className="section-kicker">Independent guidance makes the difference</p>
-            <h2 id="comparison-title">How are we different?</h2>
+    <section className="section comparison" id="why-us" aria-labelledby="comparison-title">
+      <div className="comparison-glow" aria-hidden="true" />
+      <div className="container">
+        <Reveal className="comparison-head">
+          <div className="section-head">
+            <p className="kicker">Independent guidance makes the difference</p>
+            <h2 id="comparison-title" className="section-title">
+              How are we <em>different?</em>
+            </h2>
+            <p className="section-lead">
+              We sit on your side of the table — not the builder&apos;s. See how that changes
+              every step of buying a home.
+            </p>
           </div>
-          <div className="comparison-tabs-wrap">
-            <p>Compare our services with</p>
-            <div className="comparison-tabs" role="tablist" aria-label="Comparison type">
-              {(Object.keys(comparisons) as ComparisonType[]).map((key) => (
+
+          <div className="comparison-switch">
+            <p id={`${idPrefix}-switch-label`}>Compare Propsoch with</p>
+            <div
+              className="segmented"
+              role="tablist"
+              aria-labelledby={`${idPrefix}-switch-label`}
+              onKeyDown={onTabKeyDown}
+              style={{ "--active-index": activeIndex } as CSSProperties}
+            >
+              <span className="segmented-thumb" aria-hidden="true" />
+              {order.map((key) => (
                 <button
                   type="button"
                   role="tab"
-                  id={`${tabPrefix}-${key}-tab`}
-                  aria-controls={`${tabPrefix}-panel`}
-                  aria-selected={activeComparison === key}
-                  tabIndex={activeComparison === key ? 0 : -1}
                   key={key}
-                  onClick={() => setActiveComparison(key)}
+                  ref={(element) => {
+                    if (element) tabRefs.current[key] = element;
+                  }}
+                  id={`${idPrefix}-${key}-tab`}
+                  aria-controls={`${idPrefix}-panel`}
+                  aria-selected={active === key}
+                  tabIndex={active === key ? 0 : -1}
+                  onClick={() => select(key)}
                 >
                   {comparisons[key].label}
                 </button>
               ))}
             </div>
           </div>
-        </div>
+        </Reveal>
 
-        <div
-          id={`${tabPrefix}-panel`}
-          role="tabpanel"
-          aria-labelledby={`${tabPrefix}-${activeComparison}-tab`}
+        <Reveal
           className="comparison-panel"
+          delay={120}
         >
-          <div className="comparison-table-scroll">
-            <table aria-label="Propsoch service comparison">
-              <thead>
-                <tr>
-                  <th scope="col">What you care about</th>
-                  <th scope="col" className="propsoch-column">Propsoch</th>
-                  <th scope="col">{comparison.heading}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparison.rows.map((row) => (
-                  <tr key={row.concern}>
-                    <th scope="row">{row.concern}</th>
-                    <td className="propsoch-column"><span aria-hidden="true">✓</span>{row.propsoch}</td>
-                    <td><span className="alternative-mark" aria-hidden="true">×</span>{row.alternative}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <div
+            id={`${idPrefix}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${idPrefix}-${active}-tab`}
+          >
+            <div
+              className="cmp"
+              role="table"
+              aria-label={`Propsoch compared with ${comparison.label.toLowerCase()}`}
+              aria-rowcount={comparison.rows.length + 1}
+              data-testid="comparison-table"
+            >
+              <div className="cmp-highlight" aria-hidden="true" />
 
-        <ul className="comparison-metrics" aria-label="Propsoch trust metrics">
-          {metrics.map(([value, label]) => (
-            <li key={label}><p><strong>{value}</strong> {label}</p></li>
-          ))}
-        </ul>
+              <div role="rowgroup" className="cmp-head">
+                <div role="row" className="cmp-row">
+                  <span role="columnheader" className="cmp-col-label">
+                    What you care about
+                  </span>
+                  <span role="columnheader" className="cmp-col-label is-propsoch">
+                    Propsoch
+                    <span className="cmp-badge">Recommended</span>
+                  </span>
+                  <span role="columnheader" className="cmp-col-label">
+                    {comparison.heading}
+                  </span>
+                </div>
+              </div>
+
+              <div role="rowgroup" className="cmp-body" key={active}>
+                {comparison.rows.map((row, index) => (
+                  <div
+                    role="row"
+                    className="cmp-row"
+                    key={row.concern}
+                    style={{ "--i": index } as CSSProperties}
+                  >
+                    <span role="rowheader" className="cmp-concern">
+                      {row.concern}
+                    </span>
+                    <span role="cell" className="cmp-cell is-propsoch">
+                      <span className="cmp-mark is-yes">
+                        <CheckIcon />
+                      </span>
+                      <span>
+                        <span className="cmp-cell-label" aria-hidden="true">
+                          Propsoch
+                        </span>
+                        {row.propsoch}
+                      </span>
+                    </span>
+                    <span role="cell" className="cmp-cell is-alt">
+                      <span className="cmp-mark is-no">
+                        <CrossIcon />
+                      </span>
+                      <span>
+                        <span className="cmp-cell-label" aria-hidden="true">
+                          {comparison.short}
+                        </span>
+                        {row.alternative}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
